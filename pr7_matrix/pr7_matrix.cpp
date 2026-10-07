@@ -35,7 +35,7 @@ void del_matr(int **matr, size_t n)
     delete[] matr;
   }
 }
-void transpore(int **matr_1, int **matr_2, size_t lines, size_t rows)
+void transpose(int **matr_1, int **matr_2, size_t lines, size_t rows)
 {
   for (size_t i = 0; i < rows; i++)
   {
@@ -60,14 +60,18 @@ int main()
 {
   const int invalid_input = 1;
   const int memory_error = 2;
+  long long a_1 = 0;
+  long long b_1 = 0;
   size_t a = 0;
   size_t b = 0;
-  std::cin >> a >> b;
-  if (std::cin.fail())
+  std::cin >> a_1 >> b_1;
+  if (std::cin.fail() || a_1 < 0 || b_1 < 0)
   {
-    std::cerr << "Error: invalid input\n";
+    std::cerr << "Error: invalid input!";
     return invalid_input;
   }
+  a = a_1;
+  b = b_1;
   int **matr = nullptr;
   try
   {
@@ -112,13 +116,14 @@ int main()
     {
       matr_transp[i] = arr_new(a);
     }
-    transpore(matr, matr_transp, a, b);
+    transpose(matr, matr_transp, a, b);
     del_matr(matr, a);
   }
   catch (...)
   {
     std::cerr << "error" << std::endl;
     del_matr(matr_transp, b);
+    del_matr(matr, a);
     return memory_error;
   }
   output_matr(matr_transp, b, a);
