@@ -34,7 +34,12 @@ CLANG_FORMAT_MIN := 20
 CLANG_TIDY_MIN := 20
 
 students := $(filter-out out Makefile README.md,$(wildcard *))
-labs     := $(foreach student,$(students),$(wildcard $(student)/??) $(wildcard $(student)/??.?))
+
+# A "lab" is any directory (1 or 2 levels deep) that directly contains C++ files.
+# Names do not matter: master, pr7_matrix, yasko.nikolay/P1 all work.
+# Hidden directories (.github, .git) are skipped by wildcard automatically.
+lab_files := $(wildcard */*.cpp */*.h */*.hpp */*.hxx */*/*.cpp */*/*.h */*/*.hpp */*/*.hxx)
+labs      := $(sort $(filter-out out out/% %/common,$(patsubst %/,%,$(dir $(lab_files)))))
 
 student            = $(word 1,$(subst /, ,$(1)))
 
@@ -122,7 +127,7 @@ $(addprefix doctest-,$(labs)): doctest-%: check-docker
 		/bin/bash -c "\
 			cd /workspace && \
 			echo '===   build    ===' && \
-			make build-$(student)/$(lab) && \
+			make build-$* && \
 			echo '=== acceptance ===' && \
 			/spbspu-labs-tests/test-lab-$(lab) $(student) out/$(student)/$(lab)/acceptance.xml || true && \
 			sleep 2s && \
@@ -181,7 +186,7 @@ $(addprefix format-,$(labs)): format-%: check-clang-format
 	$(eval files_headers := $(call lab_headers,$*))
 	$(eval files_tests := $(call lab_test_sources,$*))
 	$(eval files_common_sources := $(call lab_common_sources,$(call student,$*)))
-	$(eval files_common_headers := $(call lab__common_headers,$(call student,$*)))
+	$(eval files_common_headers := $(call lab_common_headers,$(call student,$*)))
 	$(eval files_common_tests := $(call lab_common_tests,$(call student,$*)))
 	$(eval files_all := $(files_sources) $(files_headers) $(files_tests) \
 		$(files_common_sources) $(files_common_headers) $(files_common_tests))
@@ -241,7 +246,7 @@ $(addprefix tidy-,$(labs)): tidy-%: check-clang-tidy
 	$(eval files_headers := $(call lab_headers,$*))
 	$(eval files_tests := $(call lab_test_sources,$*))
 	$(eval files_common_sources := $(call lab_common_sources,$(call student,$*)))
-	$(eval files_common_headers := $(call lab__common_headers,$(call student,$*)))
+	$(eval files_common_headers := $(call lab_common_headers,$(call student,$*)))
 	$(eval files_common_tests := $(call lab_common_tests,$(call student,$*)))
 	$(eval files_all := $(files_sources) $(files_headers) $(files_tests) \
 		$(files_common_sources) $(files_common_headers) $(files_common_tests))
