@@ -35,6 +35,27 @@ void del_matr(int **matr, size_t n)
         delete[] matr;
     }
 }
+void transpore(int **matr_1, int **matr_2, size_t lines, size_t rows)
+{
+    for (size_t i = 0; i < rows; i++)
+    {
+        for (size_t j = 0; j < lines; j++)
+        {
+            matr_2[i][j] = matr_1[j][i];
+        }
+    }
+}
+void output_matr(int **matr, size_t a, size_t b)
+{
+    for (size_t i = 0; i < a; i++)
+    {
+        for (size_t j = 0; j < b; j++)
+        {
+            std::cout << matr[i][j] << " ";
+        }
+        std::cout << std::endl;
+    }
+}
 int main()
 {
     const int invalid_input = 1;
@@ -62,7 +83,7 @@ int main()
     }
     catch (...)
     {
-        std::cerr << "error";
+        std::cerr << "error" << std::endl;
         del_matr(matr, a);
         return memory_error;
     }
@@ -73,20 +94,34 @@ int main()
             std::cin >> matr[i][j];
             if (std::cin.fail())
             {
-                std::cerr << "error";
+                std::cerr << "Error: invalid input!" << std::endl;
                 del_matr(matr, a);
                 return invalid_input;
             }
         }
     }
-    for (size_t j = 0; j < b; j++)
+    int **matr_transp = nullptr;
+    try
     {
-        for (size_t i = 0; i < a; i++)
+        matr_transp = matr_new(b);
+        for (size_t i = 0; i < b; i++)
         {
-            std::cout << matr[i][j] << " ";
+            matr_transp[i] = nullptr;
         }
-        std::cout << std::endl;
+        for (size_t i = 0; i < b; i++)
+        {
+            matr_transp[i] = arr_new(a);
+        }
+        transpore(matr, matr_transp, a, b);
+        del_matr(matr, a);
     }
-    del_matr(matr, a);
+    catch (...)
+    {
+        std::cerr << "error" << std::endl;
+        del_matr(matr_transp, b);
+        return memory_error;
+    }
+    output_matr(matr_transp, b, a);
+    del_matr(matr_transp, b);
     return 0;
 }
